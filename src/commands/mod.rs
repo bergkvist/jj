@@ -117,6 +117,9 @@ enum Commands {
     Rebase(RebaseArgs),
     Resolve(ResolveArgs),
     Restore(RestoreArgs),
+    #[command(hide = true)]
+    // TODO: Flesh out.
+    Run(RunArgs),
     Show(ShowArgs),
     #[command(subcommand)]
     Sparse(SparseArgs),
@@ -724,6 +727,76 @@ struct RestoreArgs {
     /// the user might not even realize something went wrong.
     #[arg(long, short, hide = true)]
     revision: Option<RevisionArg>,
+}
+
+/// The Strategy `run` uses to deal with any failure in it's subprocesses.
+// TODO: Move to run.rs
+#[derive(Debug, Default, Clone, clap::ValueEnum)]
+enum ErrorStrategy {
+    /// Stop at any revision if the subprocess fails.
+    /// Cancels any scheduled work but lets already running processes finish
+    /// their work.
+    #[default]
+    Stop,
+    /// Continue if an error occurs, similar to Make's --keep-going.
+    Continue,
+    /// Signal a fatal failure and stop immediately any processes. Also stops
+    /// any running jobs.
+    Fatal,
+}
+
+/// Run a command across a set of revisions.
+///
+///
+/// All recorded state will be persisted in the `.jj` directory, so occasionally
+/// a `jj run --clean` is needed to cleanup disk space.
+///
+/// # Example
+///
+/// # Run pre-commit on your local work
+/// $ jj run 'pre-commit.py .github/pre-commit.yaml' -r (main..@) -j 4
+///
+/// This allows pre-commit integration and other funny stuff.
+#[derive(clap::Args, Clone, Debug)]
+#[command(verbatim_doc_comment)]
+struct RunArgs {
+    /// The command to run across all selected revisions.
+    #[arg(long, short, alias = "x")]
+    command: String,
+    /// The revisions to change.
+    #[arg(long, short, default_value = "@")]
+    revisions: Vec<RevisionArg>,
+    /// How many processes should run in parallel, uses by default all cores.
+    #[arg(long, short)]
+    jobs: usize,
+    /// Setup the required environment and instead of applying running script,
+    /// display all actions which would be done.
+    #[arg(long, short)]
+    dry_run: bool,
+    /// Ignore changes across multiple run invocations.
+    #[arg(long)]
+    read_only: bool,
+    /// Show the diff of an affected revision.
+    #[arg(long)]
+    show: Option<RevisionArg>,
+    /// After running the command rebase the revisions parent onto the new
+    /// commit. This is the default strategy.
+    #[arg(long)]
+    rebase: bool,
+    /// After running the command, re-adjust the parent commit to the new
+    /// revision.
+    #[arg(long, conflicts_with = "rebase")]
+    reparent: bool,
+    /// Clean up all hidden state for run.
+    #[arg(long)]
+    clean: bool,
+    /// Run the command for all revisions, even if a single one fails.
+    /// Implies error-strategy=continue
+    #[arg(short, long)]
+    keep_going: bool,
+    /// The strategy `jj run` should use, if a failure occurs.
+    #[arg(value_enum, default_value = "ErrorStrategy::Stop")]
+    error_strategy: ErrorStrategy,
 }
 
 /// Touch up the content changes in a revision with a diff editor
@@ -3139,6 +3212,11 @@ fn cmd_merge(ui: &mut Ui, command: &CommandHelper, args: &NewArgs) -> Result<(),
     cmd_new(ui, command, args)
 }
 
+// TODO: Move to run.rs
+fn cmd_run(_ui: &mut Ui, _command: &CommandHelper, _args: &RunArgs) -> Result<(), CommandError> {
+    Err(user_error("This is a stub, do not use"))
+}
+
 #[instrument(skip_all)]
 fn cmd_rebase(ui: &mut Ui, command: &CommandHelper, args: &RebaseArgs) -> Result<(), CommandError> {
     if args.allow_large_revsets {
@@ -3728,6 +3806,7 @@ pub fn run_command(ui: &mut Ui, command_helper: &CommandHelper) -> Result<(), Co
         Commands::Squash(sub_args) => cmd_squash(ui, command_helper, sub_args),
         Commands::Unsquash(sub_args) => cmd_unsquash(ui, command_helper, sub_args),
         Commands::Restore(sub_args) => cmd_restore(ui, command_helper, sub_args),
+        Commands::Run(sub_args) => cmd_run(ui, command_helper, sub_args),
         Commands::Diffedit(sub_args) => cmd_diffedit(ui, command_helper, sub_args),
         Commands::Split(sub_args) => cmd_split(ui, command_helper, sub_args),
         Commands::Merge(sub_args) => cmd_merge(ui, command_helper, sub_args),

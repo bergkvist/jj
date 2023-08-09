@@ -31,7 +31,7 @@ chrono = { version = "0.4.26", default-features = false, features = [
 ] }
 config = { version = "0.13.3", default-features = false, features = ["toml"] }
 digest = "0.10.7"
-git2 = { git = "https://github.com/bergkvist/git2-rs" }
+git2 = { git = "https://github.com/bergkvist/git2-rs", tag = "openssh-8284af9" }
 hex = "0.4.3"
 itertools = "0.11.0"
 maplit = "1.0.2"

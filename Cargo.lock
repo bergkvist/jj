@@ -812,7 +812,7 @@ checksum = "b6c80984affa11d98d1b88b66ac8853f143217b399d3c74116778ff8fdb4ed2e"
 [[package]]
 name = "git2"
 version = "0.18.0"
-source = "git+https://github.com/bergkvist/git2-rs#f40c271ad097794e936a1a05523b8457ccb57d53"
+source = "git+https://github.com/bergkvist/git2-rs?tag=openssh-8284af9#8284af9c09ac0731231e6beb8e4f9f4ea837a947"
 dependencies = [
  "bitflags 2.3.3",
  "libc",
@@ -1112,7 +1112,7 @@ checksum = "b4668fb0ea861c1df094127ac5f1da3409a82116a4ba74fca2e58ef927159bb3"
 [[package]]
 name = "libgit2-sys"
 version = "0.16.0+1.7.0"
-source = "git+https://github.com/bergkvist/git2-rs#f40c271ad097794e936a1a05523b8457ccb57d53"
+source = "git+https://github.com/bergkvist/git2-rs?tag=openssh-8284af9#8284af9c09ac0731231e6beb8e4f9f4ea837a947"
 dependencies = [
  "cc",
  "libc",

@@ -16,7 +16,7 @@ publish = false
 
 [dependencies]
 config = { version = "0.13.2", default-features = false, features = ["toml"] }
-git2 = { git = "https://github.com/bergkvist/git2-rs" }
+git2 = { git = "https://github.com/bergkvist/git2-rs", tag = "openssh-8284af9" }
 itertools = "0.11.0"
 jj-lib = { path = ".." }
 rand = "0.8.5"
